@@ -63,7 +63,7 @@
 
   /* hero */
   #hero{position:relative;height:100vh;min-height:600px;overflow:hidden;background:#1d1e17;color:#efe9dc}
-  #hero .photo{position:absolute;inset:0;will-change:transform}
+  #hero .photo{position:absolute;inset:0}
   #hero .photo img{width:100%;height:100%;object-fit:cover;object-position:72% 40%}
   #hero .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,20,15,.7),rgba(20,20,15,.15) 50%,rgba(20,20,15,0) 65%)}
   .hero-copy{position:absolute;left:6vw;bottom:9vh;max-width:88vw}
@@ -526,7 +526,6 @@ addEventListener('pointermove', e => pointer.set(e.clientX / W * 2 - 1, e.client
 
 let sy = scrollY;
 const timer = new THREE.Timer();
-const heroPhoto = $('#hero .photo');
 
 function frame(ts){
   lenis?.raf(ts);
@@ -540,7 +539,6 @@ function frame(ts){
   const pout = clamp((sy + H - rsvpTop) / (H * .7), 0, 1);
   const e = ease(pin), presence = e * (1 - pout);
 
-  heroPhoto.style.transform = `translate3d(0,${(Math.min(sy, H) * .35).toFixed(1)}px,0)`;
 
   ringA.position.lerpVectors(fromA, restA, e); ringB.position.lerpVectors(fromB, restB, e);
   ringA.quaternion.slerpQuaternions(startA, qA, e); ringB.quaternion.slerpQuaternions(startB, qB, e);
