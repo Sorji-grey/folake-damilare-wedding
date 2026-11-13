@@ -150,9 +150,12 @@
   @media (max-width:760px){
     :root{--g:8px}
     #hero{height:100svh}
-    #hero .photo{bottom:auto;height:min(64svh,132vw)}
-    #hero .photo img{object-position:91% 30%}
-    #hero .shade{background:linear-gradient(0deg,#1d1e17 0%,#1d1e17 30%,rgba(29,30,23,.35) 46%,rgba(29,30,23,0) 60%)}
+    #hero .photo{bottom:auto;height:min(68svh,134vw)}
+    #hero .photo img{object-position:91% 30%;
+      /* eased fade: the photo itself dissolves into the dark background — no hard edge */
+      -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 50%,rgba(0,0,0,.92) 58%,rgba(0,0,0,.76) 66%,rgba(0,0,0,.54) 74%,rgba(0,0,0,.32) 82%,rgba(0,0,0,.14) 90%,rgba(0,0,0,.04) 96%,transparent 100%);
+              mask-image:linear-gradient(180deg,#000 0%,#000 50%,rgba(0,0,0,.92) 58%,rgba(0,0,0,.76) 66%,rgba(0,0,0,.54) 74%,rgba(0,0,0,.32) 82%,rgba(0,0,0,.14) 90%,rgba(0,0,0,.04) 96%,transparent 100%)}
+    #hero .shade{background:linear-gradient(180deg,rgba(20,20,15,.38) 0%,rgba(20,20,15,0) 16%)}
     .hero-copy h1{font-size:clamp(3rem,15vw,5rem)}
     .bar{top:10px;left:10px;right:10px;grid-template-columns:auto 1fr auto;gap:6px}
     .bar nav{justify-self:end}
