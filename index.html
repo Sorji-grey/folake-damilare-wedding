@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Folake &amp; Damilare — 12.12.2026</title>
+<!--
+  Art direction: ivory paper, ink-black serif, aged-gold rings. Editorial and quiet, like the reference.
+  The two rings fly in from opposite corners, interlock, then stay fixed at the centre of the screen.
+  All copy is ordinary scrolling content in two columns hugging a centre axis; every line (and photo)
+  is pushed sideways by the rings' silhouette as it passes, with a soft lag — so text flows around them.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#f4f0e7; --ink:#191812; --soft:#4a473d; --muted:#8a8473; --gold:#a07728; --line:rgba(25,24,18,.14);
+    --serif:'Newsreader',Georgia,serif; --sans:'Inter Tight',system-ui,sans-serif; --g:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--bg)}
+  body{color:var(--ink);font-family:var(--serif);background:var(--bg);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body.locked{overflow:hidden}
+  img{display:block;max-width:100%}
+  ::selection{background:var(--ink);color:var(--bg)}
+  .label{font-family:var(--sans);font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+
+  #webgl{position:fixed;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+
+  /* gate */
+  #gate{position:fixed;inset:0;z-index:60;display:grid;place-items:center;text-align:center;background:var(--bg);transition:opacity 1.1s ease,visibility 1.1s}
+  #gate.gone{opacity:0;visibility:hidden}
+  .gate-inner{display:flex;flex-direction:column;align-items:center;gap:1.5rem;padding:2rem}
+  .gate-mono{font-weight:300;font-size:clamp(4rem,11vw,7.5rem);line-height:.9;letter-spacing:-.03em}
+  .gate-mono i{color:var(--gold);font-size:.6em;vertical-align:.25em;margin:0 .08em}
+  .gate-btn{font:500 .85rem var(--sans);border:1px solid var(--ink);background:transparent;color:var(--ink);padding:1rem 1.8rem;border-radius:999px;cursor:pointer;transition:all .3s;opacity:.3;pointer-events:none}
+  .ready .gate-btn{opacity:1;pointer-events:auto}
+  .gate-btn:hover{background:var(--ink);color:var(--bg)}
+  .gate-quiet{font:400 .75rem var(--sans);color:var(--muted);background:none;border:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;opacity:0;transition:opacity .4s}
+  .ready .gate-quiet{opacity:1}
+
+  /* nav */
+  nav{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:4px;font:500 .78rem var(--sans)}
+  nav .mono{font:400 .95rem var(--serif);padding:.3rem .65rem;white-space:nowrap;background:rgba(244,240,231,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:4px}
+  nav .mono i{color:var(--gold)}
+  nav a{text-decoration:none;color:var(--ink);background:rgba(244,240,231,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:.4rem .65rem;border-radius:4px;transition:background .3s}
+  nav a:hover{background:rgba(244,240,231,1)}
+  nav a sup{font-size:.6em;margin-left:2px}
+  #sound{position:fixed;top:14px;right:14px;z-index:30;display:flex;align-items:center;gap:.5rem;white-space:nowrap;border:0;cursor:pointer;
+    background:rgba(244,240,231,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--ink);font:500 .75rem var(--sans);padding:.45rem .75rem;border-radius:4px}
+  .bars{display:flex;gap:2px;align-items:flex-end;height:11px}
+  .bars span{width:2px;background:currentColor;height:3px;border-radius:1px}
+  #sound.on .bars span{animation:eq 1s ease-in-out infinite}
+  #sound.on .bars span:nth-child(2){animation-delay:-.4s}#sound.on .bars span:nth-child(3){animation-delay:-.7s}#sound.on .bars span:nth-child(4){animation-delay:-.2s}
+  @keyframes eq{0%,100%{height:3px}50%{height:11px}}
+
+  /* hero */
+  #hero{position:relative;height:100vh;min-height:600px;overflow:hidden;background:#1d1e17;color:#efe9dc}
+  #hero .photo{position:absolute;inset:0;will-change:transform}
+  #hero .photo img{width:100%;height:100%;object-fit:cover;object-position:72% 40%}
+  #hero .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,20,15,.7),rgba(20,20,15,.15) 50%,rgba(20,20,15,0) 65%)}
+  .hero-copy{position:absolute;left:6vw;bottom:9vh;max-width:min(560px,88vw)}
+  .hero-copy .label{color:#cfc6b2}
+  .hero-copy h1{font-weight:300;font-size:clamp(3.4rem,9.5vw,9rem);line-height:.86;letter-spacing:-.035em;margin-top:.8rem}
+  .hero-copy h1 span{display:block;overflow:hidden;padding:.14em .08em .2em 0;margin:-.14em 0 -.2em}
+  .hero-copy h1 b{display:block;font-weight:300;transform:translateY(105%);transition:transform 1.4s cubic-bezier(.2,.8,.1,1)}
+  .hero-copy h1 em{color:#d8b56a;font-size:.55em;margin-right:.12em}
+  .open .hero-copy h1 b{transform:none}
+  .open .hero-copy h1 span:nth-child(2) b{transition-delay:.15s}
+  .hero-meta{position:absolute;right:6vw;bottom:9vh;text-align:right;font-size:clamp(1.3rem,2.2vw,1.9rem);font-weight:300;opacity:0;transition:opacity 1.2s .8s}
+  .hero-meta .label{color:#cfc6b2}
+  .open .hero-meta{opacity:1}
+
+  /* intro line (before the rings arrive) */
+  .lede{padding:22vh 8vw 6vh;text-align:center}
+  .lede h2{font-weight:300;font-size:clamp(2.2rem,5.2vw,4.8rem);line-height:1.04;letter-spacing:-.03em;max-width:16ch;margin:0 auto}
+  .lede h2 sup{font:500 .22em var(--sans);vertical-align:1.6em;margin-left:.15em}
+  .lede p{margin-top:2rem;font:500 .85rem var(--sans)}
+
+  /* ---------- the flow: two columns around a centre axis ---------- */
+  .flow{position:relative;padding:40vh 0 30vh}
+  .L{width:50%;padding-right:var(--g);text-align:right}
+  .R{margin-left:50%;padding-left:var(--g);text-align:left}
+  .ln{display:block;will-change:transform}
+  .ln>span{display:inline-block}
+  .blk{margin-bottom:22vh}
+  .blk .t{font:500 .82rem var(--sans);margin-bottom:1.6rem}
+  .blk .i{font-weight:400;font-size:clamp(1rem,1.35vw,1.28rem);line-height:1.35}
+  .blk .i em{color:var(--gold)}
+  .chap{position:relative;display:grid;grid-template-columns:1fr 1fr;align-items:center;margin:8vh 0 18vh}
+  .chap .a{text-align:right;padding-right:calc(var(--g) + 2.4rem)}
+  .chap .b{padding-left:calc(var(--g) + 2.4rem)}
+  .chap .ln{font:500 .85rem var(--sans)}
+  .chap .num{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:300;font-size:clamp(3rem,5vw,4.6rem);line-height:1}
+  .para{margin-bottom:-1.3em}
+  .para .w{width:min(300px,40vw);font-size:clamp(.95rem,1.12vw,1.06rem);line-height:1.5;color:var(--soft)}
+  .para.L .w{margin-left:auto}
+  .para + .para{margin-bottom:20vh}
+  .pic{margin-top:6vh;margin-bottom:20vh}
+  .pic figure{width:clamp(180px,22vw,330px)}
+  .pic.L figure{margin-left:auto}
+  .pic img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:2px}
+  .pic.wide img{aspect-ratio:4/3}
+  .pic figcaption{margin-top:.7rem;font:500 .72rem var(--sans);color:var(--muted)}
+  .quote{margin-top:-8vh}
+  .quote .i{font-style:italic}
+
+  /* rsvp */
+  .rsvp{position:relative;z-index:6;background:var(--bg);padding:12vh 6vw 14vh;display:grid;grid-template-columns:repeat(12,1fr);gap:1.5rem;border-top:1px solid var(--line)}
+  .count{grid-column:1/13;display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:0 0 3rem;margin-bottom:12vh}
+  .count div{text-align:center;flex:1}
+  .count b{display:block;font-weight:300;font-size:clamp(2.6rem,7vw,6rem);line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+  .rsvp-head{grid-column:1/6}
+  .rsvp-head h2{font-weight:300;font-size:clamp(2.6rem,6vw,5.4rem);line-height:.95;letter-spacing:-.035em;margin:1rem 0 1.4rem}
+  .rsvp-head h2 em{color:var(--gold)}
+  .rsvp-head p{color:var(--soft);font-size:1.1rem;line-height:1.55;max-width:32ch}
+  form{grid-column:7/13;display:grid;gap:1.6rem}
+  .field label{display:block;margin-bottom:.5rem}
+  .field input,.field textarea{width:100%;background:transparent;border:0;border-bottom:1px solid rgba(25,24,18,.3);color:var(--ink);font:300 1.4rem var(--serif);padding:.4rem 0 .7rem;outline:none;transition:border-color .3s}
+  .field input:focus,.field textarea:focus{border-color:var(--gold)}
+  .field textarea{resize:none;height:4.2rem}
+  .opts{display:flex;flex-wrap:wrap;gap:.5rem}
+  .opts input{position:absolute;opacity:0;pointer-events:none}
+  .opts label{font:500 .82rem var(--sans);border:1px solid rgba(25,24,18,.3);border-radius:999px;padding:.6rem 1rem;cursor:pointer;transition:all .25s;margin:0}
+  .opts input:checked+label{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .opts input:focus-visible+label{outline:2px solid var(--gold);outline-offset:2px}
+  .submit{justify-self:start;font:500 .9rem var(--sans);background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:1rem 2rem;cursor:pointer;transition:transform .3s}
+  .submit:hover{transform:translateY(-2px)}
+  .thanks{grid-column:7/13;display:none;align-self:center}
+  .thanks h3{font-weight:300;font-size:clamp(2rem,4vw,3.4rem);line-height:1;letter-spacing:-.03em;margin:1rem 0}
+  .thanks p{color:var(--soft);font-size:1.1rem}
+  .sent form{display:none}.sent .thanks{display:block}
+
+  footer{position:relative;z-index:6;overflow:hidden;background:#1d1e17;color:#efe9dc;padding:10vh 4vw 4vh}
+  footer .bg{position:absolute;inset:0;opacity:.35}
+  footer .bg img{width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+  footer .row{position:relative;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;font:400 .8rem var(--sans);color:#cfc6b2}
+  .word{position:relative;font-weight:300;font-size:16vw;line-height:.8;letter-spacing:-.06em;white-space:nowrap;margin:8vh 0 4vh;text-align:center}
+  .word em{color:#d8b56a}
+
+  @media (max-width:760px){
+    :root{--g:8px}
+    nav a.lnk{display:none}
+    .hero-meta{left:6vw;right:auto;text-align:left;bottom:4vh}
+    .hero-copy{bottom:15vh}
+    .blk .i{font-size:.84rem}
+    .blk .t{font-size:.72rem}
+    .para .w{width:40vw;font-size:.74rem}
+    .pic figure{width:33vw}
+    .pic figcaption{font-size:.6rem}
+    .chap .a{padding-right:calc(var(--g) + 1.4rem)}.chap .b{padding-left:calc(var(--g) + 1.4rem)}
+    .chap .ln{font-size:.72rem}
+    .rsvp-head,form,.thanks{grid-column:1/13}
+    .count{margin-bottom:8vh}
+    .count .label{font-size:.58rem;letter-spacing:.16em}
+  }
+</style>
+</head>
+<body class="locked">
+<canvas id="webgl"></canvas>
+
+<div id="gate">
+  <div class="gate-inner">
+    <span class="label" id="gate-status">Preparing the invitation</span>
+    <div class="gate-mono">F<i>&amp;</i>D</div>
+    <span class="label">Saturday · 12 December 2026 · Lagos</span>
+    <button class="gate-btn" id="enter">Open the invitation ♪</button>
+    <button class="gate-quiet" id="enter-quiet">Enter without music</button>
+  </div>
+</div>
+
+<nav>
+  <span class="mono">F <i>&amp;</i> D</span>
+  <a class="lnk" href="#story">Story<sup>1</sup></a>
+  <a class="lnk" href="#days">The Days<sup>2</sup></a>
+  <a href="#rsvp">RSVP<sup>3</sup></a>
+</nav>
+<button id="sound" aria-pressed="false" aria-label="Toggle background music"><span class="bars"><span></span><span></span><span></span><span></span></span><span id="sound-txt">Music off</span></button>
+
+<main>
+  <section id="hero">
+    <div class="photo"><img src="hero.jpg" alt="Folake in an ivory beaded gown and black gele, arm in arm with Damilare in a black agbada and coral beads" /></div>
+    <div class="shade"></div>
+    <div class="hero-copy">
+      <span class="label">Together with their families</span>
+      <h1><span><b>Folake</b></span><span><b><em>&amp;</em>Damilare</b></span></h1>
+    </div>
+    <div class="hero-meta"><div class="label">Ibadan · Lagos</div>12 · 12 · 2026</div>
+  </section>
+
+  <section class="lede">
+    <h2>Two families, one love, and a party Lagos won't forget<sup>™</sup></h2>
+    <p>You're invited. Keep scrolling — the rings are on their way.</p>
+  </section>
+
+  <section class="flow" id="flow">
+    <div class="blk L" id="story"><div class="ln t"><span>Save the Date</span></div>
+      <div class="ln i"><span>Friday, 11 December</span></div><div class="ln i"><span>Saturday, 12 December</span></div><div class="ln i"><span>Ibadan &amp; Lagos</span></div><div class="ln i"><span><em>Two days, one forever</em></span></div></div>
+    <div class="blk R"><div class="ln t"><span>Where We Met</span></div>
+      <div class="ln i"><span>A bookshop in Lekki</span></div><div class="ln i"><span>The last copy on the shelf</span></div><div class="ln i"><span>Two hands, one book</span></div><div class="ln i"><span>Coffee, then forever</span></div></div>
+    <div class="blk L"><div class="ln t"><span>The Question</span></div>
+      <div class="ln i"><span>Labadi Beach, Accra</span></div><div class="ln i"><span>March, at sunset</span></div><div class="ln i"><span>He knelt in the sand</span></div><div class="ln i"><span><em>She said yes</em></span></div><div class="ln i"><span>before he finished</span></div></div>
+
+    <div class="chap"><div class="a"><span class="ln"><span>Ch. One</span></span></div><div class="num">I</div><div class="b"><span class="ln"><span>How We Met</span></span></div></div>
+    <div class="para L"><div class="w split">It was a slow Saturday in Lekki and there was exactly one copy left. We reached for it at the same moment — and neither of us let go.</div></div>
+    <div class="para R"><div class="w split">He offered to let her have it, on one condition: that she tell him how it ends, over coffee. Five years of Sundays later, she is still telling him how things end.</div></div>
+    <div class="pic R"><figure class="ln"><img src="bookshop.jpg" alt="Folake and Damilare laughing as they reach for the same book in a bookshop" /><figcaption>Lekki, 2019 — the book is still on her nightstand</figcaption></figure></div>
+
+    <div class="chap" id="days"><div class="a"><span class="ln"><span>Ch. Two</span></span></div><div class="num">II</div><div class="b"><span class="ln"><span>The Traditional</span></span></div></div>
+    <div class="pic L"><figure class="ln"><img src="garden.jpg" alt="The couple walking hand in hand through a garden arch in emerald and gold aso-oke" /><figcaption>Ìgbéyàwó, in emerald</figcaption></figure></div>
+    <div class="blk R"><div class="ln t"><span>Friday</span></div>
+      <div class="ln i"><span>11 December, two o'clock</span></div><div class="ln i"><span>The Family House, Ibadan</span></div><div class="ln i"><span>Aso-ebi: emerald &amp; gold</span></div><div class="ln i"><span>Drummers until dark</span></div><div class="ln i"><span><em>Come ready to spray</em></span></div></div>
+    <div class="para L"><div class="w split">The families meet, the elders pray, the drummers take over. Bring your appetite, your dancing shoes, and crisp notes for the dance floor.</div></div>
+    <div class="para R"><div class="w split">Children are very welcome. Parking is at the school opposite; ushers in emerald gele will show you in.</div></div>
+
+    <div class="chap"><div class="a"><span class="ln"><span>Ch. Three</span></span></div><div class="num">III</div><div class="b"><span class="ln"><span>The White Wedding</span></span></div></div>
+    <div class="pic R wide"><figure class="ln"><img src="beach.jpg" alt="Damilare in a linen suit and Folake in a long veil, foreheads touching on a beach at sunset" /><figcaption>Vows by the water</figcaption></figure></div>
+    <div class="blk L"><div class="ln t"><span>Saturday</span></div>
+      <div class="ln i"><span>12 December, four o'clock</span></div><div class="ln i"><span>Eko Pavilion, Lagos</span></div><div class="ln i"><span>Ceremony at sunset</span></div><div class="ln i"><span>Dinner, band, dancing</span></div><div class="ln i"><span><em>Until our feet give up</em></span></div></div>
+    <div class="blk R"><div class="ln t"><span>Dress Code</span></div>
+      <div class="ln i"><span>Ivory &amp; linen</span></div><div class="ln i"><span>Gele high</span></div><div class="ln i"><span>Agbada proud</span></div><div class="ln i"><span>Barefoot welcome</span></div></div>
+    <div class="blk L"><div class="ln t"><span>Good to Know</span></div>
+      <div class="ln i"><span>Your presence is the gift</span></div><div class="ln i"><span>Shuttles from Ikoyi</span></div><div class="ln i"><span>Adults-only reception</span></div><div class="ln i"><span>RSVP by 1 November</span></div></div>
+
+    <div class="pic L"><figure class="ln"><img src="portrait.jpg" alt="Formal portrait: Folake seated on a carved chair, Damilare standing beside her with a cane" style="aspect-ratio:4/3" /><figcaption>The Oyèbámijí–Adéyẹmí families</figcaption></figure></div>
+    <div class="blk R quote"><div class="ln t"><span>Grandma Àdùkẹ́ says</span></div>
+      <div class="ln i"><span>“Ìfẹ́ ni àṣẹ —</span></div><div class="ln i"><span>love is the authority.”</span></div></div>
+
+    <div class="chap"><div class="a"><span class="ln"><span>Ch. Four</span></span></div><div class="num">IV</div><div class="b"><span class="ln"><span>Your Reply</span></span></div></div>
+  </section>
+
+  <section class="rsvp" id="rsvp">
+    <div class="count" aria-label="Countdown to the wedding">
+      <div><b id="cd-d">00</b><span class="label">Days</span></div>
+      <div><b id="cd-h">00</b><span class="label">Hours</span></div>
+      <div><b id="cd-m">00</b><span class="label">Minutes</span></div>
+      <div><b id="cd-s">00</b><span class="label">Seconds</span></div>
+    </div>
+    <div class="rsvp-head">
+      <span class="label">Kindly reply by 1 November</span>
+      <h2>Will you <em>dance</em> with us?</h2>
+      <p>Save us a seat at the table — and tell us which celebration you'll be at.</p>
+    </div>
+    <form id="rsvp-form">
+      <div class="field"><label class="label" for="nm">Your name</label><input id="nm" required autocomplete="name" placeholder="Adébáyọ̀ Okafor" /></div>
+      <div class="field"><label class="label" for="em">Email</label><input id="em" type="email" required autocomplete="email" placeholder="you@example.com" /></div>
+      <div class="field"><span class="label" style="display:block;margin-bottom:.8rem">I'll be at</span>
+        <div class="opts">
+          <input type="radio" name="at" id="o1" value="both" checked><label for="o1">Both days</label>
+          <input type="radio" name="at" id="o2" value="trad"><label for="o2">The Traditional</label>
+          <input type="radio" name="at" id="o3" value="white"><label for="o3">The White Wedding</label>
+          <input type="radio" name="at" id="o4" value="no"><label for="o4">Celebrating from afar</label>
+        </div>
+      </div>
+      <div class="field"><label class="label" for="ms">A note for the couple</label><textarea id="ms" placeholder="Prayers, advice, song requests…"></textarea></div>
+      <button class="submit" type="submit">Send RSVP</button>
+    </form>
+    <div class="thanks" role="status"><span class="label">Ẹ ṣé gan</span><h3 id="thanks-h">Thank you.</h3><p id="thanks-p">We can't wait to celebrate with you.</p></div>
+  </section>
+
+  <footer>
+    <div class="bg"><img src="beach.jpg" alt="" /></div>
+    <div class="row"><span>#FoDamForever</span><span>Questions — ask Tolu, our planner</span><span>12 · 12 · 2026</span></div>
+    <div class="word">Folake <em>&amp;</em> Dami</div>
+    <div class="row"><span>Made with love in Lagos</span><span>Ibadan · Lagos</span></div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import WebGL from 'three/addons/capabilities/WebGL.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const $ = (s) => document.querySelector(s);
+const clamp = THREE.MathUtils.clamp, damp = THREE.MathUtils.damp;
+const ease = (t) => 1 - Math.pow(1 - t, 3);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* =========================== MUSIC (generated in-browser) =========================== */
+const Music = (() => {
+  let ctx, master, verb, timer, step = 0, nextT = 0, on = false;
+  const BPM = 76, STEP = 60 / BPM / 2;                       // eighth notes
+  const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
+  // D major pentatonic world; progression D – Bm – G – A
+  const chords = [[62,66,69,74],[59,62,66,71],[55,59,62,67],[57,61,64,69]];
+  const scale = [62,64,66,69,71,74,76,78,81];
+  const patterns = [
+    [0,null,2,null,1,3,null,2],[3,null,2,1,null,0,null,null],
+    [0,2,null,3,null,2,1,null],[null,1,null,3,2,null,0,null]];
+  function impulse(sec){
+    const len = ctx.sampleRate * sec, b = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++){ const d = b.getChannelData(c);
+      for (let i = 0; i < len; i++) d[i] = (Math.random()*2 - 1) * Math.pow(1 - i/len, 3.2); }
+    return b;
+  }
+  function init(){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = 0;
+    const comp = ctx.createDynamicsCompressor();
+    verb = ctx.createConvolver(); verb.buffer = impulse(3.6);
+    const wet = ctx.createGain(); wet.gain.value = .55;
+    verb.connect(wet).connect(master);
+    master.connect(comp).connect(ctx.destination);
+  }
+  function out(node, dry = .6){ const g = ctx.createGain(); g.gain.value = dry; node.connect(g).connect(master); node.connect(verb); }
+  function pluck(n, t, vel = .18){                          // kalimba-like tine
+    const f = midi(n), g = ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel, t + .004);
+    g.gain.exponentialRampToValueAtTime(.0001, t + 2.2);
+    const o1 = ctx.createOscillator(); o1.type = 'sine'; o1.frequency.value = f;
+    const o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = f * 5.4;   // tine overtone
+    const g2 = ctx.createGain(); g2.gain.setValueAtTime(vel * .35, t); g2.gain.exponentialRampToValueAtTime(.0001, t + .25);
+    o1.connect(g); o2.connect(g2).connect(g); out(g);
+    o1.start(t); o2.start(t); o1.stop(t + 2.4); o2.stop(t + .3);
+  }
+  function pad(notes, t, dur){
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700; lp.Q.value = .3;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(.035, t + dur * .35); g.gain.linearRampToValueAtTime(0, t + dur + .8);
+    notes.slice(0,3).forEach((n,i) => [-6,6].forEach(cents => {
+      const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = midi(n - 12); o.detune.value = cents;
+      o.connect(lp); o.start(t); o.stop(t + dur + 1);
+    }));
+    lp.connect(g); out(g, .5);
+  }
+  function bass(n, t){
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = midi(n - 24);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.12, t + .05); g.gain.exponentialRampToValueAtTime(.001, t + 3);
+    o.connect(g); out(g, .8); o.start(t); o.stop(t + 3.1);
+  }
+  function schedule(){
+    while (nextT < ctx.currentTime + .25){
+      const bar = Math.floor(step / 8), s = step % 8, ci = bar % 4, chord = chords[ci];
+      if (s === 0){ pad(chord, nextT, STEP * 8); bass(chord[0], nextT); }
+      const p = patterns[(bar >> 1) % 4][s];
+      if (p !== null) pluck(chord[p] + 12, nextT, .1 + Math.random() * .06);
+      if (s === 5 && Math.random() < .55) pluck(scale[(Math.random() * scale.length) | 0] + 12, nextT + STEP * .5, .06);
+      nextT += STEP; step++;
+    }
+  }
+  return {
+    get on(){ return on; },
+    async start(){
+      if (!ctx) init();
+      await ctx.resume();
+      if (!timer){ nextT = ctx.currentTime + .1; timer = setInterval(schedule, 60); }
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setTargetAtTime(.55, ctx.currentTime, 1.2);
+      on = true; ui();
+    },
+    stop(){
+      if (!ctx) return; on = false; ui();
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setTargetAtTime(0, ctx.currentTime, .35);
+      setTimeout(() => { if (!on){ clearInterval(timer); timer = null; ctx.suspend(); } }, 1600);
+    },
+  };
+  function ui(){ const b = $('#sound'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); $('#sound-txt').textContent = on ? 'Music on' : 'Music off'; }
+})();
+
+
+let wantMusic = false;
+$('#sound').addEventListener('click', () => { wantMusic = !Music.on; Music.on ? Music.stop() : Music.start().catch(()=>{}); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && Music.on) Music.stop(), wantMusic = true;
+  else if (!document.hidden && wantMusic && !Music.on) Music.start().catch(()=>{});
+});
+
+/* =========================== GATE =========================== */
+function openSite(withMusic){
+  $('#gate').classList.add('gone'); document.body.classList.remove('locked'); document.body.classList.add('open');
+  if (withMusic){ wantMusic = true; Music.start().catch(()=>{}); }
+  requestAnimationFrame(layout);
+}
+$('#enter').addEventListener('click', () => openSite(true));
+$('#enter-quiet').addEventListener('click', () => openSite(false));
+
+/* =========================== TEXT THAT FLOWS AROUND THE RINGS =========================== */
+// Split paragraphs into real visual lines so each line can be pushed on its own.
+const splits = [...document.querySelectorAll('.split')];
+splits.forEach(el => el.dataset.src = el.textContent.trim());
+function splitLines(){
+  splits.forEach(el => {
+    el.innerHTML = el.dataset.src.split(/\s+/).map(w => `<span class="wd">${w}</span>`).join(' ');
+    const rows = [];
+    el.querySelectorAll('.wd').forEach(w => { const t = w.offsetTop; let r = rows.find(r => Math.abs(r.t - t) < 4); if (!r) rows.push(r = { t, words: [] }); r.words.push(w.textContent); });
+    el.innerHTML = rows.map(r => `<span class="ln"><span>${r.words.join(' ')}</span></span>`).join('');
+  });
+}
+let lines = [];
+function collect(){
+  const old = lines;
+  lines = [...document.querySelectorAll('#flow .ln')].map(el => {
+    const side = el.closest('.L, .a') ? 'L' : 'R';
+    const prev = old.find(l => l.el === el);
+    el.style.transform = '';
+    const r = el.getBoundingClientRect(), inner = el.firstElementChild?.getBoundingClientRect() || r;
+    const isFig = el.tagName === 'FIGURE';
+    const w = isFig ? r.width : inner.width;
+    const left = isFig ? r.left : inner.left;
+    return { el, side, top: r.top + scrollY, h: r.height, w, room: side === 'L' ? left - 6 : innerWidth - (left + w) - 6, off: prev ? prev.off : 0 };
+  });
+}
+
+/* =========================== THREE.JS — THE RINGS =========================== */
+if (!WebGL.isWebGL2Available()){
+  $('#gate-status').textContent = 'You are invited'; document.querySelector('.gate-inner').classList.add('ready');
+  throw new Error('WebGL2 unavailable');
+}
+const canvas = $('#webgl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x000000, 0);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, .1, 100);
+camera.position.set(0, 0, 12);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), .03).texture;
+scene.environmentIntensity = 1.15;
+pmrem.dispose();
+const key = new THREE.DirectionalLight('#fff1dc', 2.6); key.position.set(-4, 5, 6); scene.add(key);
+const rim = new THREE.DirectionalLight('#ffd2a0', 3); rim.position.set(5, 1, -6); scene.add(rim);
+
+function bandGeometry(ri, ro, hw){
+  const pts = [], rc = (ri + ro) / 2, hr = (ro - ri) / 2;
+  for (let i = 0; i <= 64; i++){
+    const a = (i / 64) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+    pts.push(new THREE.Vector2(rc + hr * Math.sign(c) * Math.pow(Math.abs(c), c > 0 ? .55 : .9), hw * Math.sign(s) * Math.pow(Math.abs(s), .45)));
+  }
+  const g = new THREE.LatheGeometry(pts, 160); g.rotateX(Math.PI / 2); return g;
+}
+const goldA = new THREE.MeshPhysicalMaterial({ color: '#efc77a', metalness: 1, roughness: .13, clearcoat: .4, clearcoatRoughness: .1 });
+const goldB = new THREE.MeshPhysicalMaterial({ color: '#d39f52', metalness: 1, roughness: .28, clearcoat: .2 });
+
+const rings = new THREE.Group(); scene.add(rings);
+const ringA = new THREE.Group();
+ringA.add(new THREE.Mesh(bandGeometry(.9, 1.0, .085), goldA));
+const gemMat = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0, roughness: 0, transmission: 1, thickness: .6, ior: 2.42, dispersion: 4, envMapIntensity: 2.4, flatShading: true });
+const GY = 1.17, gem = new THREE.Group();
+const crown = new THREE.Mesh(new THREE.CylinderGeometry(.11, .2, .07, 16, 1), gemMat); crown.position.y = GY + .035;
+const pav = new THREE.Mesh(new THREE.ConeGeometry(.2, .19, 16, 1), gemMat); pav.rotation.x = Math.PI; pav.position.y = GY - .095;
+gem.add(crown, pav);
+for (let i = 0; i < 6; i++){
+  const a = i / 6 * Math.PI * 2 + Math.PI / 6;
+  const prong = new THREE.Mesh(new THREE.CapsuleGeometry(.018, .2, 4, 8), goldA);
+  prong.position.set(Math.cos(a) * .19, GY - .04, Math.sin(a) * .19); prong.rotation.set(Math.sin(a) * .25, 0, -Math.cos(a) * .25);
+  gem.add(prong);
+}
+const basket = new THREE.Mesh(new THREE.TorusGeometry(.13, .02, 8, 32), goldA); basket.rotation.x = Math.PI / 2; basket.position.y = GY - .14; gem.add(basket);
+ringA.add(gem);
+const ringB = new THREE.Group();
+ringB.add(new THREE.Mesh(bandGeometry(.92, 1.05, .14), goldB));
+rings.add(ringA, ringB);
+
+// sparkle on the stone
+const sc = document.createElement('canvas'); sc.width = sc.height = 128; { const g = sc.getContext('2d');
+  const grd = g.createRadialGradient(64,64,0,64,64,64); grd.addColorStop(0,'#fff'); grd.addColorStop(.15,'rgba(255,240,210,.5)'); grd.addColorStop(1,'rgba(255,240,210,0)');
+  g.fillStyle = grd; g.fillRect(0,0,128,128); g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(62,4,4,120); g.fillRect(4,62,120,4); }
+const sTex = new THREE.CanvasTexture(sc); sTex.colorSpace = THREE.SRGBColorSpace;
+const sparks = [[.06, GY + .08, .05], [-.1, GY + .02, -.08]].map((p, i) => {
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: sTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+  s.position.set(...p); s.userData.ph = i * 2.4; ringA.add(s); return s;
+});
+
+const restA = new THREE.Vector3(-.5, 0, 0), restB = new THREE.Vector3(.52, -.02, 0);
+const qA = new THREE.Quaternion(), qB = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2 - .28, .12, 0));
+const startA = new THREE.Quaternion().setFromEuler(new THREE.Euler(2.2, -1.4, 1.2));
+const startB = new THREE.Quaternion().setFromEuler(new THREE.Euler(-1.8, 2.0, -.6));
+const fromA = new THREE.Vector3(7, 5, -6), fromB = new THREE.Vector3(-7, -5, -6);
+
+/* =========================== LAYOUT & LOOP =========================== */
+let W = innerWidth, H = innerHeight, ringPx = 100, worldScale = 1, flowTop = 0, rsvpTop = 0, pxPerUnit = 1;
+function layout(){
+  W = innerWidth; H = innerHeight;
+  renderer.setSize(W, H); camera.aspect = W / H; camera.updateProjectionMatrix();
+  pxPerUnit = H / (2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+  ringPx = Math.min(W * (W < 760 ? .135 : .1), H * .16);            // on-screen half-width of the ring pair
+  worldScale = ringPx / pxPerUnit / 1.55;
+  splitLines(); collect();
+  flowTop = $('#flow').getBoundingClientRect().top + scrollY;
+  rsvpTop = $('#rsvp').getBoundingClientRect().top + scrollY;
+}
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 120); });
+document.querySelectorAll('#flow img').forEach(img => img.complete || img.addEventListener('load', () => layout(), { once: true }));
+
+const pointer = new THREE.Vector2(), pSm = new THREE.Vector2();
+addEventListener('pointermove', e => pointer.set(e.clientX / W * 2 - 1, e.clientY / H * 2 - 1));
+
+let sy = scrollY;
+const timer = new THREE.Timer();
+const heroPhoto = $('#hero .photo');
+
+function frame(ts){
+  timer.update(ts);
+  const dt = Math.min(timer.getDelta(), 1 / 30), t = timer.getElapsed(), y = scrollY;
+  sy = damp(sy, y, reduced ? 30 : 8, dt);
+  pSm.x = damp(pSm.x, pointer.x, 3, dt); pSm.y = damp(pSm.y, pointer.y, 3, dt);
+
+  // arrival: rings fly in while the intro scrolls through; leave when the RSVP arrives
+  const pin = clamp((sy - H * .55) / (flowTop - H * .55 - H * .35), 0, 1);
+  const pout = clamp((sy + H - rsvpTop) / (H * .7), 0, 1);
+  const e = ease(pin), presence = e * (1 - pout);
+
+  heroPhoto.style.transform = `translate3d(0,${(Math.min(sy, H) * .35).toFixed(1)}px,0)`;
+
+  ringA.position.lerpVectors(fromA, restA, e); ringB.position.lerpVectors(fromB, restB, e);
+  ringA.quaternion.slerpQuaternions(startA, qA, e); ringB.quaternion.slerpQuaternions(startB, qB, e);
+  const spin = (sy - flowTop) / H;                                   // turns as you scroll
+  const idle = reduced ? 0 : t;
+  rings.scale.setScalar(worldScale);
+  rings.position.set(pSm.x * .1, pout * 6 + (reduced ? 0 : Math.sin(idle * .9) * .04), 0);
+  rings.rotation.set(.35 + Math.sin(spin * .9) * .3 - pSm.y * .1, spin * 1.15 + idle * .15 + pSm.x * .2 + pout * 2, -.15 + Math.cos(spin * .6) * .15);
+  canvas.style.visibility = pin <= 0 || pout >= 1 ? 'hidden' : 'visible';
+
+  sparks.forEach(sp => { const k = Math.max(0, Math.sin(t * 2.2 + sp.userData.ph)); sp.scale.setScalar(.05 + .3 * Math.pow(k, 6)); sp.material.opacity = Math.pow(k, 3); });
+
+  // push every line / photo away from the ring silhouette (circle), with a soft lag
+  const cy = H / 2 - rings.position.y * pxPerUnit;
+  const R = (ringPx + (W < 760 ? 8 : 22)) * presence;
+  for (const l of lines){
+    const top = l.top - y;
+    if (top > H + 200 || top + l.h < -200){ l.off = 0; continue; }
+    const dy = Math.max(0, Math.abs(top + l.h / 2 - cy) - l.h / 2);
+    let target = dy < R ? Math.sqrt(R * R - dy * dy) : 0;
+    target = Math.min(target, Math.max(0, l.room));
+    l.off = reduced ? target : damp(l.off, target, 7, dt);
+    const x = (l.side === 'L' ? -l.off : l.off);
+    l.el.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
+  }
+
+  if (pin > 0 && pout < 1) renderer.render(scene, camera);
+}
+
+Promise.all([document.fonts.ready, $('#hero img').decode().catch(() => {}), renderer.compileAsync(scene, camera).catch(() => {})]).then(() => {
+  layout(); renderer.setAnimationLoop(frame);
+  $('#gate-status').textContent = 'You are invited';
+  document.querySelector('.gate-inner').classList.add('ready');
+});
+
+/* =========================== COUNTDOWN & RSVP =========================== */
+const target = Date.parse('2026-12-12T16:00:00+01:00'), pad2 = n => String(n).padStart(2, '0');
+function tick(){
+  let d = Math.max(0, target - Date.now()) / 1000;
+  $('#cd-d').textContent = pad2(Math.floor(d / 86400)); d %= 86400;
+  $('#cd-h').textContent = pad2(Math.floor(d / 3600)); d %= 3600;
+  $('#cd-m').textContent = pad2(Math.floor(d / 60)); $('#cd-s').textContent = pad2(Math.floor(d % 60));
+}
+tick(); setInterval(tick, 1000);
+$('#rsvp-form').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const name = $('#nm').value.trim().split(' ')[0] || 'friend', at = document.querySelector('input[name=at]:checked').value;
+  $('#thanks-h').textContent = at === 'no' ? `We'll miss you, ${name}.` : `See you there, ${name}.`;
+  $('#thanks-p').textContent = at === 'no' ? 'Thank you for the love from afar — we’ll save you some jollof.' : 'Your seat is saved. Start practising your dance moves.';
+  $('#rsvp').classList.add('sent');
+});
+</script>
+</body>
+</html>
