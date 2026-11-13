@@ -31,7 +31,8 @@
   .lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}
   .lenis.lenis-smooth iframe{pointer-events:none}
 
-  #webgl{position:fixed;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+  #webgl{position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:5;pointer-events:none}
+  #vh-probe{position:fixed;top:0;left:0;width:1px;height:100vh;height:100lvh;visibility:hidden;pointer-events:none}
 
   /* gate */
   #gate{position:fixed;inset:0;z-index:60;display:grid;place-items:center;text-align:center;background:var(--bg);transition:opacity 1.1s ease,visibility 1.1s}
@@ -146,6 +147,11 @@
 
   @media (max-width:760px){
     :root{--g:8px}
+    #hero{height:100svh}
+    #hero .photo{bottom:auto;height:min(64svh,132vw)}
+    #hero .photo img{object-position:91% 30%}
+    #hero .shade{background:linear-gradient(0deg,#1d1e17 0%,#1d1e17 30%,rgba(29,30,23,.35) 46%,rgba(29,30,23,0) 60%)}
+    .hero-copy h1{font-size:clamp(3rem,15vw,5rem)}
     nav a.lnk{display:none}
     .hero-meta{left:6vw;right:auto;text-align:left;bottom:4vh}
     .hero-copy{bottom:15vh}
@@ -164,6 +170,7 @@
 </head>
 <body class="locked">
 <canvas id="webgl"></canvas>
+<div id="vh-probe"></div>
 
 <div id="gate">
   <div class="gate-inner">
@@ -429,8 +436,9 @@ if (!WebGL.isWebGL2Available()){
 }
 const canvas = $('#webgl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
+const touch = matchMedia('(pointer: coarse)').matches;
+renderer.setPixelRatio(Math.min(devicePixelRatio, touch ? 1.5 : 2));
+renderer.setSize(innerWidth, innerHeight, false);
 renderer.setClearColor(0x000000, 0);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
@@ -459,7 +467,10 @@ const goldB = new THREE.MeshPhysicalMaterial({ color: '#d39f52', metalness: 1, r
 const rings = new THREE.Group(); scene.add(rings);
 const ringA = new THREE.Group();
 ringA.add(new THREE.Mesh(bandGeometry(.9, 1.0, .085), goldA));
-const gemMat = new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0, roughness: 0, transmission: 1, thickness: .6, ior: 2.42, dispersion: 4, envMapIntensity: 2.4, flatShading: true });
+// Real glass (transmission) costs an extra render pass every frame; phones get a polished-crystal look instead.
+const gemMat = touch
+  ? new THREE.MeshPhysicalMaterial({ color: '#f4f8ff', metalness: .2, roughness: 0, clearcoat: 1, clearcoatRoughness: 0, iridescence: .6, envMapIntensity: 3.2, flatShading: true })
+  : new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0, roughness: 0, transmission: 1, thickness: .6, ior: 2.42, dispersion: 4, envMapIntensity: 2.4, flatShading: true });
 const GY = 1.17, gem = new THREE.Group();
 const crown = new THREE.Mesh(new THREE.CylinderGeometry(.11, .2, .07, 16, 1), gemMat); crown.position.y = GY + .035;
 const pav = new THREE.Mesh(new THREE.ConeGeometry(.2, .19, 16, 1), gemMat); pav.rotation.x = Math.PI; pav.position.y = GY - .095;
@@ -494,9 +505,10 @@ const fromA = new THREE.Vector3(7, 5, -6), fromB = new THREE.Vector3(-7, -5, -6)
 
 /* =========================== LAYOUT & LOOP =========================== */
 let W = innerWidth, H = innerHeight, ringPx = 100, worldScale = 1, flowTop = 0, rsvpTop = 0, pxPerUnit = 1;
+const probe = $('#vh-probe');
 function layout(){
-  W = innerWidth; H = innerHeight;
-  renderer.setSize(W, H); camera.aspect = W / H; camera.updateProjectionMatrix();
+  W = innerWidth; H = probe.offsetHeight || innerHeight;    // large-viewport height: stable while the address bar moves
+  renderer.setSize(W, H, false); camera.aspect = W / H; camera.updateProjectionMatrix();
   pxPerUnit = H / (2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
   ringPx = Math.min(W * (W < 760 ? .135 : .1), H * .16);            // on-screen half-width of the ring pair
   worldScale = ringPx / pxPerUnit / 1.55;
@@ -504,7 +516,9 @@ function layout(){
   flowTop = $('#flow').getBoundingClientRect().top + scrollY;
   rsvpTop = $('#rsvp').getBoundingClientRect().top + scrollY;
 }
-let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 120); });
+// Only re-layout when the width changes (rotation, window resize) — phones fire resize as the address bar slides in/out.
+let rt, lastW = innerWidth;
+addEventListener('resize', () => { if (touch && innerWidth === lastW) return; lastW = innerWidth; clearTimeout(rt); rt = setTimeout(layout, 150); });
 document.querySelectorAll('#flow img').forEach(img => img.complete || img.addEventListener('load', () => layout(), { once: true }));
 
 const pointer = new THREE.Vector2(), pSm = new THREE.Vector2();
@@ -544,13 +558,14 @@ function frame(ts){
   const R = (ringPx + (W < 760 ? 8 : 22)) * presence;
   for (const l of lines){
     const top = l.top - y;
-    if (top > H + 200 || top + l.h < -200){ l.off = 0; continue; }
+    if (top > H + 200 || top + l.h < -200){ if (l.drawn){ l.off = 0; l.drawn = 0; l.el.style.transform = ''; } continue; }
     const dy = Math.max(0, Math.abs(top + l.h / 2 - cy) - l.h / 2);
     let target = dy < R ? Math.sqrt(R * R - dy * dy) : 0;
     target = Math.min(target, Math.max(0, l.room));
     l.off = reduced ? target : damp(l.off, target, 7, dt);
-    const x = (l.side === 'L' ? -l.off : l.off);
-    l.el.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
+    if (Math.abs(l.off - (l.drawn ?? -1)) < .15) continue;
+    l.drawn = l.off;
+    l.el.style.transform = `translate3d(${(l.side === 'L' ? -l.off : l.off).toFixed(1)}px,0,0)`;
   }
 
   if (pin > 0 && pout < 1) renderer.render(scene, camera);
