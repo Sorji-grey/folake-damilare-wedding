@@ -26,6 +26,11 @@
   ::selection{background:var(--ink);color:var(--bg)}
   .label{font-family:var(--sans);font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
 
+  /* Lenis smooth scroll */
+  html.lenis,html.lenis body{height:auto}
+  .lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}
+  .lenis.lenis-smooth iframe{pointer-events:none}
+
   #webgl{position:fixed;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 
   /* gate */
@@ -270,18 +275,24 @@
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/",
+  "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.3.27/dist/lenis.mjs"
 } }
 </script>
 <script type="module">
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import Lenis from 'lenis';
 
 const $ = (s) => document.querySelector(s);
 const clamp = THREE.MathUtils.clamp, damp = THREE.MathUtils.damp;
 const ease = (t) => 1 - Math.pow(1 - t, 3);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Smooth scroll (skipped for people who ask for reduced motion). Driven from the render loop below.
+const lenis = reduced ? null : new Lenis({ lerp: .085, wheelMultiplier: .9, anchors: true, autoRaf: false });
+lenis?.stop();
 
 /* =========================== MUSIC (generated in-browser) =========================== */
 const Music = (() => {
@@ -377,6 +388,7 @@ document.addEventListener('visibilitychange', () => {
 function openSite(withMusic){
   $('#gate').classList.add('gone'); document.body.classList.remove('locked'); document.body.classList.add('open');
   if (withMusic){ wantMusic = true; Music.start().catch(()=>{}); }
+  lenis?.start();
   requestAnimationFrame(layout);
 }
 $('#enter').addEventListener('click', () => openSite(true));
@@ -412,6 +424,7 @@ function collect(){
 /* =========================== THREE.JS — THE RINGS =========================== */
 if (!WebGL.isWebGL2Available()){
   $('#gate-status').textContent = 'You are invited'; document.querySelector('.gate-inner').classList.add('ready');
+  if (lenis){ const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); }; requestAnimationFrame(raf); }
   throw new Error('WebGL2 unavailable');
 }
 const canvas = $('#webgl');
@@ -502,9 +515,10 @@ const timer = new THREE.Timer();
 const heroPhoto = $('#hero .photo');
 
 function frame(ts){
+  lenis?.raf(ts);
   timer.update(ts);
   const dt = Math.min(timer.getDelta(), 1 / 30), t = timer.getElapsed(), y = scrollY;
-  sy = damp(sy, y, reduced ? 30 : 8, dt);
+  sy = lenis ? y : damp(sy, y, reduced ? 30 : 8, dt);            // Lenis already eases the scroll
   pSm.x = damp(pSm.x, pointer.x, 3, dt); pSm.y = damp(pSm.y, pointer.y, 3, dt);
 
   // arrival: rings fly in while the intro scrolls through; leave when the RSVP arrives
